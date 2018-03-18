@@ -1,0 +1,115 @@
+<html>
+<head>
+    <style>
+        .row {
+            width: 100%;
+            background-color: grey;
+            height: 10px;
+        }
+
+        .row .cell {
+            display: inline-block;
+            background-color: #d3bec1;
+            width: 6px;
+            height: 6px;
+            margin-left: 2px;
+            margin-top: 2px;
+            float: left;
+        }
+
+        .row .cell.active {
+            background-color: #41ee18;
+        }
+
+        .row .cell.inactive {
+            background-color: #004eff;
+        }
+    </style>
+</head>
+
+<body>
+<script>
+    function randBinary() {
+        return Math.floor(Math.random() * 2);
+    }
+
+    const NUMBER_OF_GENS = 200;
+    const GENERATION_SIZE = 192;
+    const life = [];
+
+    const cases = ['111','110','101','100', '011','010', '001','000'];
+    const rule127 = [0,1,1,1,1,1,1,1];
+    const rule121 = [0,1,1,1,1,0,0,1];
+    const rule073 = [0,1,0,0,1,0,0,1];
+
+    const rules = [rule127, rule121, rule073];
+    const appliedRule = rules[1];
+
+    function div(type) {
+        const div = document.createElement('div');
+
+        div.classList.add(type);
+        return div;
+    }
+
+    function renderCell(row, cell) {
+        const d = div('cell');
+        const className = cell.state ? 'active' : 'inactive';
+
+        d.classList.add(className);
+        row.appendChild(d);
+    }
+
+    function render(i) {
+        const lastGen = life[i];
+        const row = div('row');
+
+        lastGen.forEach(renderCell.bind(null, row));
+
+        document.body.appendChild(row);
+    }
+
+    function getState(previousGeneration, i) {
+        let key = '';
+        key += previousGeneration[i - 1] ? previousGeneration[i - 1].state.toString() : '0';
+        key += previousGeneration[i].state.toString();
+        key += previousGeneration[i + 1] ? previousGeneration[i + 1].state.toString() : '0';
+
+        return appliedRule[cases.indexOf(key)];
+    }
+
+    function generateCell(i) {
+        let cell = {};
+        let prevgen = life[life.length - 1];
+        const newState = life.length === 0 ? randBinary() : getState(prevgen, i);
+
+        cell.state = newState;
+        return cell;
+    }
+
+
+    function fillGeneration() {
+        let generation = [];
+
+        for (let index = 0; index < GENERATION_SIZE; index++) {
+            generation.push(generateCell(index));
+        }
+
+        return life.push(generation)
+    }
+
+    function run() {
+        const gen = fillGeneration();
+
+        (function(i){
+            setTimeout(render.bind(null,i), 600)
+        })(gen - 1);
+    }
+
+    for (let i = 0; i < NUMBER_OF_GENS; i++) {
+        run();
+    }
+</script>
+</body>
+
+</html>
